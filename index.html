@@ -237,7 +237,32 @@
         p.value = ''; a.value = '';
         refresh();
     }
+// 削除機能
+    function deleteRecord(index) {
+        if(confirm("この記録を削除しますか？")) {
+            data.splice(index, 1);
+            saveAndRefresh();
+        }
+    }
 
+    // 編集機能
+    function editRecord(index) {
+        const r = data[index];
+        const newP = prompt("内容を編集:", r.p);
+        if(newP === null) return; 
+        const newA = prompt("金額を編集:", r.amt);
+        if(newA === null || isNaN(parseInt(newA))) return;
+
+        data[index].p = newP;
+        data[index].amt = parseInt(newA);
+        saveAndRefresh();
+    }
+
+    // 保存と画面更新の共通処理
+    function saveAndRefresh() {
+        localStorage.setItem('myBudgetV10', JSON.stringify(data));
+        refresh();
+    }
     function moveMonth(n) { viewDate.setMonth(viewDate.getMonth() + n); drawCalendar(); }
     function clearAll() { if(confirm("全削除しますか？")) { localStorage.clear(); location.reload(); } }
 
