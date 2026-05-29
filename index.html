@@ -45,6 +45,13 @@
         .history { width: 100%; max-width: 500px; margin-top: 20px; }
         .hist-item { background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .reset-link { margin-top: 30px; color: #999; font-size: 0.7rem; cursor: pointer; background: none; border: none; text-decoration: underline; }
+    /* 履歴のレイアウト調整とボタンのスタイル */
+        .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; }
+        .hist-info { display: flex; flex-direction: column; flex-grow: 1; }
+        .hist-actions { display: flex; gap: 8px; margin-left: 10px; }
+        .btn-edit, .btn-delete { border: none; padding: 5px 10px; border-radius: 5px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
+        .btn-edit { background: #e8f0fe; color: var(--main); }
+        .btn-delete { background: #fce8e6; color: var(--error); }
     </style>
 </head>
 <body>
@@ -192,15 +199,31 @@
 
     function drawHistory(targetDate) {
         const body = document.getElementById('hist-body');
-        const dayLogs = data.filter(r => r.dt === targetDate).reverse();
-        const [y, m, d] = targetDate.split('-');
-        body.innerHTML = `<h3>${m}/${d} の履歴</h3>`;
-        if(dayLogs.length === 0) body.innerHTML += '<p style="color:#999; font-size:0.8rem;">記録なし</p>';
+        body.innerHTML = `<h3>${targetDate.split('-')[1]}/${targetDate.split('-')[2]} の履歴</h3>`;
+        
+        // 元のデータの位置(index)を保持しつつ、その日の分を抽出
+        const dayLogs = data.map((r, index) => ({...r, originalIndex: index}))
+                            .filter(r => r.dt === targetDate)
+                            .reverse();
+
+        if(dayLogs.length === 0) {
+            body.innerHTML += '<p style="color:#999; font-size:0.8rem;">記録なし</p>';
+            return;
+        }
+
         dayLogs.forEach(r => {
             const item = document.createElement('div');
             item.className = 'hist-item';
-            item.innerHTML = `<span>${r.p}</span><b>-¥${r.amt.toLocaleString()}</b>`;
-            // 長押しやクリックで削除する機能などを後でつけることも可能
+            item.innerHTML = `
+                <div class="hist-info">
+                    <span style="font-weight:bold;">${r.p}</span>
+                    <span style="color:var(--error); font-size:0.9rem;">-¥${r.amt.toLocaleString()}</span>
+                </div>
+                <div class="hist-actions">
+                    <button class="btn-edit" onclick="editRecord(${r.originalIndex})">編集</button>
+                    <button class="btn-delete" onclick="deleteRecord(${r.originalIndex})">削除</button>
+                </div>
+            `;
             body.appendChild(item);
         });
     }
